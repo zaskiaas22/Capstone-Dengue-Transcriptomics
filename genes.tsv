@@ -1,0 +1,35 @@
+# --- 1. INSTALL & LOAD LIBRARY ---
+if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+packages <- c("org.Hs.eg.db", "clusterProfiler", "enrichplot", "ggplot2", "pheatmap")
+BiocManager::install(packages, update = FALSE, ask = FALSE)
+
+library(org.Hs.eg.db)
+library(clusterProfiler)
+library(enrichplot)
+library(ggplot2)
+library(pheatmap)
+
+# --- 2. PILIH FILE ---
+# Akan muncul jendela popup, pilih file 'GSE18090.top.table.tsv'
+print("PILIH FILE GSE18090.top.table.tsv PADA JENDELA YANG MUNCUL")
+tT <- read.delim(file.choose(), row.names = 1)
+
+# --- 3. FILTER DATA ---
+# Ambil gen signifikan p < 0.05
+genes_to_test <- rownames(tT[tT$adj.P.Val < 0.05,])
+
+# --- 4. ANALISIS ENRICHMENT (GO) ---
+# Mengubah ID gen
+entrez_ids <- mapIds(org.Hs.eg.db, keys = genes_to_test, column = "ENTREZID", keytype = "PROBEID")
+
+# Proses analisis (Tunggu sampai tanda STOP merah hilang)
+go_res <- enrichGO(gene = entrez_ids, OrgDb = org.Hs.eg.db, ont = "BP", readable = TRUE)
+
+# --- 5. TAMPILKAN HASIL ---
+# Muncul di panel PLOTS
+dotplot(go_res, title="Gene Ontology - GSE18090")
+
+
+
+
+
